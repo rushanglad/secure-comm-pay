@@ -25,7 +25,7 @@ const Profile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, full_name, name')
+        .select('username, name')
         .eq('id', session.user.id)
         .single();
 
