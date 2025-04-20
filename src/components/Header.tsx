@@ -1,12 +1,20 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, MessageSquare, Menu, X } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="fixed w-full bg-white bg-opacity-80 backdrop-blur-md z-50 shadow-sm">
@@ -38,12 +46,35 @@ const Header = () => {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-100">
-            Sign In
-          </Button>
-          <Button className="bg-primary-500 hover:bg-primary-600 text-white">
-            Join Waitlist
-          </Button>
+          {session ? (
+            <>
+              <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-100">
+                Dashboard
+              </Button>
+              <Button 
+                onClick={handleSignOut}
+                className="bg-primary-500 hover:bg-primary-600 text-white"
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                className="border-primary-500 text-primary-500 hover:bg-primary-100"
+                onClick={() => navigate('/auth')}
+              >
+                Sign In
+              </Button>
+              <Button 
+                className="bg-primary-500 hover:bg-primary-600 text-white"
+                onClick={() => navigate('/auth')}
+              >
+                Join Waitlist
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Navigation Toggle */}

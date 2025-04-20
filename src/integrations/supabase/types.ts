@@ -9,7 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          aadhaar_number: string | null
+          avatar_url: string | null
+          cbdc_wallet: string | null
+          city: string | null
+          country: string | null
+          crypto_address: string | null
+          dob: string | null
+          id: string
+          name: string | null
+          phone_number: string | null
+          secondary_email: string | null
+          state: string | null
+          updated_at: string | null
+          upi_id: string | null
+          username: string
+          virtual_aadhaar: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          aadhaar_number?: string | null
+          avatar_url?: string | null
+          cbdc_wallet?: string | null
+          city?: string | null
+          country?: string | null
+          crypto_address?: string | null
+          dob?: string | null
+          id: string
+          name?: string | null
+          phone_number?: string | null
+          secondary_email?: string | null
+          state?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+          username: string
+          virtual_aadhaar?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          aadhaar_number?: string | null
+          avatar_url?: string | null
+          cbdc_wallet?: string | null
+          city?: string | null
+          country?: string | null
+          crypto_address?: string | null
+          dob?: string | null
+          id?: string
+          name?: string | null
+          phone_number?: string | null
+          secondary_email?: string | null
+          state?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+          username?: string
+          virtual_aadhaar?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
