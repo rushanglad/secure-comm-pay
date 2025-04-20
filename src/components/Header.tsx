@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Mail, MessageSquare, Menu, X } from "lucide-react";
+import { Mail, MessageSquare, Menu, X, User } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,7 +29,6 @@ const Header = () => {
           </span>
         </div>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <a href="#features" className="text-navy-700 hover:text-primary-500 transition-colors">
             Features
@@ -48,8 +47,13 @@ const Header = () => {
         <div className="hidden md:flex items-center space-x-4">
           {session ? (
             <>
-              <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-100">
-                Dashboard
+              <Button 
+                variant="outline" 
+                className="border-primary-500 text-primary-500 hover:bg-primary-100"
+                onClick={() => navigate('/profile')}
+              >
+                <User className="mr-2 h-4 w-4" />
+                Profile
               </Button>
               <Button 
                 onClick={handleSignOut}
@@ -77,7 +81,6 @@ const Header = () => {
           )}
         </div>
 
-        {/* Mobile Navigation Toggle */}
         <button 
           className="md:hidden text-navy-800 focus:outline-none" 
           onClick={toggleMenu}
@@ -90,7 +93,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Mobile Navigation Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-lg py-4 px-6">
           <nav className="flex flex-col space-y-4">
@@ -122,14 +124,30 @@ const Header = () => {
             >
               Security
             </a>
-            <div className="flex flex-col space-y-2 pt-2">
-              <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-100">
-                Sign In
-              </Button>
-              <Button className="bg-primary-500 hover:bg-primary-600 text-white">
-                Join Waitlist
-              </Button>
-            </div>
+            {session && (
+              <div className="flex flex-col space-y-2 pt-2">
+                <Button 
+                  variant="outline" 
+                  className="border-primary-500 text-primary-500 hover:bg-primary-100"
+                  onClick={() => {
+                    navigate('/profile');
+                    toggleMenu();
+                  }}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </Button>
+                <Button 
+                  onClick={() => {
+                    handleSignOut();
+                    toggleMenu();
+                  }}
+                  className="bg-primary-500 hover:bg-primary-600 text-white"
+                >
+                  Sign Out
+                </Button>
+              </div>
+            )}
           </nav>
         </div>
       )}
