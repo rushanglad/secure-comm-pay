@@ -20,7 +20,7 @@ const Profile = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  const { data: profile, isLoading, error, refetch } = useQuery({
+  const { data: profile, isLoading, error, refetch } = useQuery<ProfileData>({
     queryKey: ['profile', session.user.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -31,11 +31,11 @@ const Profile = () => {
 
       if (error) throw error;
       
-      // Return data with the correct shape for our form
+      // Map the 'name' column from database to 'full_name' prop
       return {
         username: data?.username || '',
-        full_name: data?.name || null, // Using name field from database as full_name
-      } as ProfileData;
+        full_name: data?.name || null,
+      };
     }
   });
 
@@ -72,3 +72,4 @@ const Profile = () => {
 };
 
 export default Profile;
+
