@@ -1,7 +1,10 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { ProfileForm } from '@/components/profile/ProfileForm';
 
 const Profile = () => {
   const { session } = useAuth();
@@ -9,6 +12,36 @@ const Profile = () => {
   // Redirect to auth if not logged in
   if (!session) {
     return <Navigate to="/auth" replace />;
+  }
+
+  const { data: profile, isLoading, error, refetch } = useQuery({
+    queryKey: ['profile', session.user.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username, full_name')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-100 to-navy-200">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-100 to-navy-200">
+        <p className="text-red-500">Error loading profile</p>
+      </div>
+    );
   }
 
   return (
@@ -20,7 +53,7 @@ const Profile = () => {
             <label className="block text-gray-700 font-medium mb-2">Email</label>
             <p className="bg-gray-100 p-2 rounded">{session.user.email}</p>
           </div>
-          {/* Placeholder for additional profile information */}
+          {profile && <ProfileForm profile={profile} onUpdate={refetch} />}
         </div>
       </div>
     </div>
@@ -28,4 +61,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
