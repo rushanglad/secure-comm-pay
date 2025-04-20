@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck, MessageSquare, Mail, Send } from "lucide-react";
 
 const HeroSection = () => {
   return (
