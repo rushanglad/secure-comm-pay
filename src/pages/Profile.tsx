@@ -6,6 +6,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 
+// Define the profile type to match what the form expects
+interface ProfileData {
+  username: string;
+  full_name: string | null;
+}
+
 const Profile = () => {
   const { session } = useAuth();
   
@@ -19,12 +25,17 @@ const Profile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, full_name')
+        .select('username, full_name, name')
         .eq('id', session.user.id)
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Return data with the correct shape for our form
+      return {
+        username: data?.username || '',
+        full_name: data?.name || null, // Using name field from database as full_name
+      } as ProfileData;
     }
   });
 
@@ -39,7 +50,7 @@ const Profile = () => {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-100 to-navy-200">
-        <p className="text-red-500">Error loading profile</p>
+        <p className="text-red-500">Error loading profile: {(error as Error).message}</p>
       </div>
     );
   }

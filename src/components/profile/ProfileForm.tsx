@@ -31,7 +31,7 @@ export const ProfileForm = ({ profile, onUpdate }: {
         .from('profiles')
         .update({
           username: data.username,
-          full_name: data.full_name,
+          name: data.full_name, // Save to name field in the database
           updated_at: new Date().toISOString()
         })
         .eq('id', session?.user.id);
