@@ -1,3 +1,4 @@
+
 import { MatrixClient, createClient } from "matrix-js-sdk";
 import { supabase } from "@/integrations/supabase/client";
 

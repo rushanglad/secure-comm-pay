@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { loginMatrixUser } from '@/utils/matrix';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -18,14 +19,48 @@ const LoginForm = () => {
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const username = email.split('@')[0]; // Extract username from email
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // 1. Login to Supabase
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // 2. Try to login to Matrix using the same credentials
+      // This is a best-effort approach - we won't fail if Matrix login fails
+      try {
+        const matrixLogin = await loginMatrixUser(username, password);
+        
+        // Check if we need to store these credentials
+        if (authData.user && matrixLogin) {
+          const { data: existingCreds } = await supabase
+            .from('matrix_credentials')
+            .select('*')
+            .eq('user_id', authData.user.id)
+            .maybeSingle();
+            
+          if (!existingCreds) {
+            // Store Matrix credentials if they don't exist
+            await supabase
+              .from('matrix_credentials')
+              .insert({
+                user_id: authData.user.id,
+                matrix_user_id: matrixLogin.user_id,
+                access_token: matrixLogin.access_token,
+                device_id: matrixLogin.device_id,
+                home_server: 'https://matrix.org',
+              });
+          }
+        }
+      } catch (matrixError) {
+        // Log matrix error but don't fail the login process
+        console.error('Matrix login failed:', matrixError);
+        // We'll continue even if Matrix login fails
+      }
 
       toast.success('Logged in successfully');
       navigate('/dashboard');
