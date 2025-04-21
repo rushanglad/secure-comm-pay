@@ -32,7 +32,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <Sidebar defaultCollapsed={isCollapsed} className="h-screen">
+        <Sidebar className="h-screen">
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel>Services</SidebarGroupLabel>

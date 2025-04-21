@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,8 +65,8 @@ export const useMatrix = () => {
         room_name: room.name,
         last_message: event.getContent().body,
         last_message_timestamp: new Date(event.getTs()).toISOString(),
-        // Check if the room is a direct message room using the room's metadata
-        is_direct: Boolean(room.getMyMembership() === 'join' && room.guestsCanJoin === false),
+        // Check if the room is a direct message room using the room's membership
+        is_direct: Boolean(room.getMyMembership() === 'join' && room.getJoinedMemberCount() === 2),
       });
   };
 

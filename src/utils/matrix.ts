@@ -50,12 +50,12 @@ export const registerMatrixUser = async (username: string, password: string) => 
   const tempClient = createClient({ baseUrl: homeserver });
   
   try {
-    // Use the proper registration method from the current Matrix SDK version
+    // Use the correct register method format according to matrix-js-sdk
     const registration = await tempClient.register(
       username,
       password,
       undefined, // device ID will be generated
-      "", // initial device display name
+      {}, // Initial device display name (empty object)
       {
         type: "m.login.password",
       }
