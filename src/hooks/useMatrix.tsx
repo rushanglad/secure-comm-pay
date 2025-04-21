@@ -20,11 +20,12 @@ export const useMatrix = () => {
         setClient(matrixClient);
         setRooms(matrixClient.getRooms());
 
-        matrixClient.on('Room', (room: Room) => {
+        // Use string literals for event names as per the updated API
+        matrixClient.on('Room' as any, (room: Room) => {
           setRooms(matrixClient.getRooms());
         });
 
-        matrixClient.on('Room.timeline', (event: MatrixEvent) => {
+        matrixClient.on('Room.timeline' as any, (event: MatrixEvent) => {
           // Update rooms when new messages arrive
           setRooms(matrixClient.getRooms());
           
@@ -65,7 +66,8 @@ export const useMatrix = () => {
         room_name: room.name,
         last_message: event.getContent().body,
         last_message_timestamp: new Date(event.getTs()).toISOString(),
-        is_direct: room.isDmRoom(),
+        // Check if the room is a direct message room using the room's metadata
+        is_direct: Boolean(room.getMyMembership() === 'join' && room.guestsCanJoin === false),
       });
   };
 
@@ -85,8 +87,9 @@ export const useMatrix = () => {
     if (!client) return;
     
     try {
+      // Use a valid preset from the matrix-js-sdk
       const room = await client.createRoom({
-        preset: 'trusted_private_chat',
+        preset: 'private_chat' as any,
         invite: [userId],
         is_direct: true
       });

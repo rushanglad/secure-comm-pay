@@ -50,12 +50,15 @@ export const registerMatrixUser = async (username: string, password: string) => 
   const tempClient = createClient({ baseUrl: homeserver });
   
   try {
-    const registration = await tempClient.registerWithPassword(
+    // Use the proper registration method from the current Matrix SDK version
+    const registration = await tempClient.register(
       username,
       password,
       undefined, // device ID will be generated
-      "SecureComm User", // display name
-      false // prevent guest registration
+      "", // initial device display name
+      {
+        type: "m.login.password",
+      }
     );
 
     return registration;
