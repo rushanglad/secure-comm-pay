@@ -11,9 +11,9 @@ import { useAuth } from '@/hooks/useAuth';
 const Auth = () => {
   const { session } = useAuth();
   
-  // Redirect to home if already logged in
+  // Redirect to dashboard if already logged in
   if (session) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
