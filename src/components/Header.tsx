@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Mail, MessageSquare, Menu, X, User } from "lucide-react";
+import { Mail, MessageSquare, Menu, X, User, LayoutDashboard } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -55,6 +54,14 @@ const Header = () => {
         <div className="hidden md:flex items-center space-x-4">
           {session ? (
             <>
+              <Button 
+                variant="outline" 
+                className="border-primary-500 text-primary-500 hover:bg-primary-100"
+                onClick={() => navigate('/dashboard')}
+              >
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Button>
               <Button 
                 variant="outline" 
                 className="border-primary-500 text-primary-500 hover:bg-primary-100"
