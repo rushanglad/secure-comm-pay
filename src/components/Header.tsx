@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, MessageSquare, Menu, X, User } from "lucide-react";
@@ -14,6 +15,13 @@ const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+  
+  const scrollToWaitlist = () => {
+    // Close menu if open
+    if (isMenuOpen) setIsMenuOpen(false);
+    // Scroll to waitlist section smoothly
+    document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -73,7 +81,7 @@ const Header = () => {
               </Button>
               <Button 
                 className="bg-primary-500 hover:bg-primary-600 text-white"
-                onClick={() => navigate('/auth')}
+                onClick={scrollToWaitlist}
               >
                 Join Waitlist
               </Button>
@@ -124,7 +132,7 @@ const Header = () => {
             >
               Security
             </a>
-            {session && (
+            {session ? (
               <div className="flex flex-col space-y-2 pt-2">
                 <Button 
                   variant="outline" 
@@ -145,6 +153,25 @@ const Header = () => {
                   className="bg-primary-500 hover:bg-primary-600 text-white"
                 >
                   Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-2 pt-2">
+                <Button 
+                  variant="outline" 
+                  className="border-primary-500 text-primary-500 hover:bg-primary-100 w-full"
+                  onClick={() => {
+                    navigate('/auth');
+                    toggleMenu();
+                  }}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  className="bg-primary-500 hover:bg-primary-600 text-white w-full"
+                  onClick={scrollToWaitlist}
+                >
+                  Join Waitlist
                 </Button>
               </div>
             )}

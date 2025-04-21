@@ -2,8 +2,16 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, MessageSquare, Mail, Send } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  
+  const scrollToWaitlist = () => {
+    // Scroll to waitlist section smoothly
+    document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section className="pt-32 pb-20 md:pt-40 md:pb-28 bg-gradient-to-br from-navy-100 to-navy-200">
       <div className="container mx-auto px-4 md:px-6">
@@ -26,7 +34,11 @@ const HeroSection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button size="lg" className="bg-primary-500 hover:bg-primary-600 text-white">
+              <Button 
+                size="lg" 
+                className="bg-primary-500 hover:bg-primary-600 text-white"
+                onClick={scrollToWaitlist}
+              >
                 Join Waitlist
               </Button>
               
