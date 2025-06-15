@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logSecurityEvent, SECURITY_EVENTS } from '@/utils/securityLogger';
+import { clearMatrixSession } from '@/utils/matrix';
 
 interface AuthContextType {
   session: Session | null;
@@ -42,6 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }, 0);
       } else if (event === 'SIGNED_OUT') {
+        // Clear Matrix session on logout
+        clearMatrixSession();
+        
         setTimeout(() => {
           logSecurityEvent({
             action: SECURITY_EVENTS.LOGOUT,
@@ -55,6 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
+    // Clear Matrix session before signing out
+    clearMatrixSession();
     await supabase.auth.signOut();
   };
 

@@ -1,5 +1,7 @@
+
 import { MatrixClient, createClient } from "matrix-js-sdk";
 import { supabase } from "@/integrations/supabase/client";
+import { getDecryptedMatrixCredentials } from "./encryption";
 
 interface MatrixCredentials {
   matrix_user_id: string;
@@ -8,48 +10,68 @@ interface MatrixCredentials {
   home_server: string;
 }
 
-interface MatrixCredentialsSecure {
-  matrix_user_id: string;
-  access_token?: string; // Only if legacy/plain still needed
-  encrypted_access_token?: Uint8Array | string; // New encrypted token
-  access_token_salt?: string | null;
-  device_id: string;
-  home_server: string;
-}
-
 let matrixClient: MatrixClient | null = null;
+let cachedMatrixPassword: string | null = null;
 
 // Helper to issue a warning if legacy plaintext access_token is being used
 function warnIfPlainTokenInUse(credentials: any) {
   if (credentials.access_token && !credentials.encrypted_access_token) {
-    console.warn('[SECURITY] Using PLAINTEXT Matrix access_token. Upgrade to encrypted_access_token ASAP!');
+    console.warn('[SECURITY] Using PLAINTEXT Matrix access_token. Please re-login to upgrade to encrypted storage!');
   }
 }
 
-// UPDATE this function once you are ready to use encrypted tokens only
-export const initializeMatrixClient = async (userId: string): Promise<MatrixClient | null> => {
+// Initialize Matrix client with encrypted credentials
+export const initializeMatrixClient = async (
+  userId: string, 
+  matrixPassword?: string
+): Promise<MatrixClient | null> => {
   try {
-    // Fetch secure matrix credentials from Supabase
-    const { data: credentials, error } = await supabase
-      .from('matrix_credentials')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    let credentials: MatrixCredentials | null = null;
 
-    if (error || !credentials) {
-      console.error('Error fetching Matrix credentials:', error);
+    // Try to get decrypted credentials if we have the Matrix password
+    if (matrixPassword || cachedMatrixPassword) {
+      const password = matrixPassword || cachedMatrixPassword!;
+      credentials = await getDecryptedMatrixCredentials(userId, password);
+      
+      // Cache the password for this session (in memory only)
+      if (matrixPassword) {
+        cachedMatrixPassword = matrixPassword;
+      }
+    }
+
+    // Fallback to checking for legacy plaintext credentials
+    if (!credentials) {
+      const { data: legacyCredentials, error } = await supabase
+        .from('matrix_credentials')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error || !legacyCredentials) {
+        console.error('Error fetching Matrix credentials:', error);
+        return null;
+      }
+
+      warnIfPlainTokenInUse(legacyCredentials);
+
+      if (legacyCredentials.access_token) {
+        credentials = {
+          matrix_user_id: legacyCredentials.matrix_user_id,
+          access_token: legacyCredentials.access_token,
+          device_id: legacyCredentials.device_id,
+          home_server: legacyCredentials.home_server
+        };
+      }
+    }
+
+    if (!credentials) {
+      console.log('No Matrix credentials found for user');
       return null;
     }
 
-    warnIfPlainTokenInUse(credentials);
-
-    // TODO: Future: decrypt and use credentials.encrypted_access_token after migration is complete.
-    // For now, fallback to legacy access_token for compatibility.
-    // If encrypted_access_token is present, prefer it (implementation of decryption needed).
-
     matrixClient = createClient({
       baseUrl: credentials.home_server,
-      accessToken: credentials.access_token, // TODO: Switch to decrypted token
+      accessToken: credentials.access_token,
       userId: credentials.matrix_user_id,
       deviceId: credentials.device_id,
     });
@@ -66,17 +88,25 @@ export const getCurrentMatrixClient = (): MatrixClient | null => {
   return matrixClient;
 };
 
+// Clear cached password on logout
+export const clearMatrixSession = () => {
+  cachedMatrixPassword = null;
+  if (matrixClient) {
+    matrixClient.stopClient();
+    matrixClient = null;
+  }
+};
+
 export const registerMatrixUser = async (username: string, password: string) => {
-  const homeserver = "https://matrix.org"; // You might want to make this configurable
+  const homeserver = "https://matrix.org";
   const tempClient = createClient({ baseUrl: homeserver });
   
   try {
-    // Use the correct register method format according to matrix-js-sdk
     const registration = await tempClient.register(
       username,
       password,
-      undefined, // guest access token
-      undefined // initial device display name
+      undefined,
+      undefined
     );
 
     return registration;
@@ -98,6 +128,3 @@ export const loginMatrixUser = async (username: string, password: string) => {
     throw error;
   }
 };
-
-// NOTE: All functions will need to be updated to use end-to-end encrypted access tokens only once your migration & encryption layer is ready.
-// See the Supabase migration notes and Team TODOs above.
