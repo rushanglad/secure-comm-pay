@@ -1,4 +1,3 @@
-
 import { MatrixClient, createClient } from "matrix-js-sdk";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -54,11 +53,10 @@ export const registerMatrixUser = async (username: string, password: string) => 
     const registration = await tempClient.register(
       username,
       password,
-      undefined, // device ID will be generated
-      {}, // Initial device display name (empty object)
+      undefined, // guest access token
+      undefined, // initial device display name
       {
         type: "m.login.password",
-        session: undefined
       }
     );
 
