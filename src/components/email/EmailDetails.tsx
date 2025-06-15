@@ -1,15 +1,22 @@
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Reply, Forward, Archive, MoreHorizontal, Mail } from 'lucide-react';
+import { Reply, Forward, Archive, MoreHorizontal, Mail, ArrowLeft } from 'lucide-react';
 import type { Email } from './types';
 
 interface EmailDetailsProps {
   email: Email | undefined;
   isFolderEmpty: boolean;
+  onBack?: () => void;
+  showBackButton?: boolean;
 }
 
-export const EmailDetails = ({ email, isFolderEmpty }: EmailDetailsProps) => {
+export const EmailDetails = ({
+  email,
+  isFolderEmpty,
+  onBack,
+  showBackButton,
+}: EmailDetailsProps) => {
   if (!email) {
     return (
       <div className="flex-1 bg-white flex items-center justify-center h-full">
@@ -27,13 +34,26 @@ export const EmailDetails = ({ email, isFolderEmpty }: EmailDetailsProps) => {
     <div className="flex-1 bg-white h-full flex flex-col">
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-start justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              {email.subject}
-            </h2>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span>From: {email.from}</span>
-              <span>{email.timestamp}</span>
+          <div className="flex items-center gap-3">
+            {showBackButton && onBack && (
+              <Button
+                size="icon"
+                variant="outline"
+                className="mr-2"
+                onClick={onBack}
+                aria-label="Back"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {email.subject}
+              </h2>
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <span>From: {email.from}</span>
+                <span>{email.timestamp}</span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
