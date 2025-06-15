@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { logSecurityEvent, SECURITY_EVENTS } from '@/utils/securityLogger';
 
 interface ProfileFormData {
   username: string;
@@ -31,12 +32,22 @@ export const ProfileForm = ({ profile, onUpdate }: {
         .from('profiles')
         .update({
           username: data.username,
-          name: data.full_name, // Save to name field in the database
+          name: data.full_name,
           updated_at: new Date().toISOString()
         })
         .eq('id', session?.user.id);
 
       if (error) throw error;
+      
+      // Log security event for profile update
+      await logSecurityEvent({
+        action: SECURITY_EVENTS.PROFILE_UPDATE,
+        resource: 'profiles',
+        details: { 
+          userId: session?.user.id,
+          updatedFields: ['username', 'name']
+        }
+      });
       
       toast.success('Profile updated successfully');
       onUpdate();

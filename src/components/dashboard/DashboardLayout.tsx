@@ -38,7 +38,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <Sidebar className="h-screen" collapsible>
+        <Sidebar className="h-screen" collapsible="icon">
           <SidebarContent>
             <div className="p-3 md:p-4 border-b border-gray-200">
               <div className="flex items-center space-x-2">
@@ -79,7 +79,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <header className="bg-white border-b border-gray-200 px-3 md:px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-4">
               <SidebarTrigger>
-                <Button variant="ghost" size={isMobile ? "sm" : "icon"} className="touch-manipulation">
+                <Button variant="ghost" size={isMobile ? "sm" : "default"} className="touch-manipulation">
                   <Menu className="h-4 w-4 md:h-5 md:w-5" />
                 </Button>
               </SidebarTrigger>
