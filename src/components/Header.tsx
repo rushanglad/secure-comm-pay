@@ -1,20 +1,14 @@
+
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Mail, MessageSquare, Menu, X, User, LayoutDashboard } from "lucide-react";
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { Mail, MessageSquare, Menu, X } from "lucide-react";
+import Navigation from './header/Navigation';
+import UserActions from './header/UserActions';
+import MobileMenu from './header/MobileMenu';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { session, signOut } = useAuth();
-  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
   
   const scrollToWaitlist = () => {
     // Close menu if open
@@ -36,65 +30,8 @@ const Header = () => {
           </span>
         </div>
 
-        <nav className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-navy-700 hover:text-primary-500 transition-colors">
-            Features
-          </a>
-          <a href="#payments" className="text-navy-700 hover:text-primary-500 transition-colors">
-            Payments
-          </a>
-          <a href="#platforms" className="text-navy-700 hover:text-primary-500 transition-colors">
-            Platforms
-          </a>
-          <a href="#security" className="text-navy-700 hover:text-primary-500 transition-colors">
-            Security
-          </a>
-        </nav>
-
-        <div className="hidden md:flex items-center space-x-4">
-          {session ? (
-            <>
-              <Button 
-                variant="outline" 
-                className="border-primary-500 text-primary-500 hover:bg-primary-100"
-                onClick={() => navigate('/dashboard')}
-              >
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-primary-500 text-primary-500 hover:bg-primary-100"
-                onClick={() => navigate('/profile')}
-              >
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </Button>
-              <Button 
-                onClick={handleSignOut}
-                className="bg-primary-500 hover:bg-primary-600 text-white"
-              >
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button 
-                variant="outline" 
-                className="border-primary-500 text-primary-500 hover:bg-primary-100"
-                onClick={() => navigate('/auth')}
-              >
-                Sign In
-              </Button>
-              <Button 
-                className="bg-primary-500 hover:bg-primary-600 text-white"
-                onClick={scrollToWaitlist}
-              >
-                Join Waitlist
-              </Button>
-            </>
-          )}
-        </div>
+        <Navigation />
+        <UserActions scrollToWaitlist={scrollToWaitlist} />
 
         <button 
           className="md:hidden text-navy-800 focus:outline-none" 
@@ -108,83 +45,11 @@ const Header = () => {
         </button>
       </div>
 
-      {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg py-4 px-6">
-          <nav className="flex flex-col space-y-4">
-            <a 
-              href="#features" 
-              className="text-navy-700 hover:text-primary-500 transition-colors"
-              onClick={toggleMenu}
-            >
-              Features
-            </a>
-            <a 
-              href="#payments" 
-              className="text-navy-700 hover:text-primary-500 transition-colors"
-              onClick={toggleMenu}
-            >
-              Payments
-            </a>
-            <a 
-              href="#platforms" 
-              className="text-navy-700 hover:text-primary-500 transition-colors"
-              onClick={toggleMenu}
-            >
-              Platforms
-            </a>
-            <a 
-              href="#security" 
-              className="text-navy-700 hover:text-primary-500 transition-colors"
-              onClick={toggleMenu}
-            >
-              Security
-            </a>
-            {session ? (
-              <div className="flex flex-col space-y-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  className="border-primary-500 text-primary-500 hover:bg-primary-100"
-                  onClick={() => {
-                    navigate('/profile');
-                    toggleMenu();
-                  }}
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </Button>
-                <Button 
-                  onClick={() => {
-                    handleSignOut();
-                    toggleMenu();
-                  }}
-                  className="bg-primary-500 hover:bg-primary-600 text-white"
-                >
-                  Sign Out
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  className="border-primary-500 text-primary-500 hover:bg-primary-100 w-full"
-                  onClick={() => {
-                    navigate('/auth');
-                    toggleMenu();
-                  }}
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  className="bg-primary-500 hover:bg-primary-600 text-white w-full"
-                  onClick={scrollToWaitlist}
-                >
-                  Join Waitlist
-                </Button>
-              </div>
-            )}
-          </nav>
-        </div>
-      )}
+      <MobileMenu 
+        isOpen={isMenuOpen}
+        onToggle={toggleMenu}
+        scrollToWaitlist={scrollToWaitlist}
+      />
     </header>
   );
 };
