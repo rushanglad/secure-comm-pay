@@ -94,7 +94,7 @@ const CalendarInterface = () => {
             <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-purple-600 hover:bg-purple-700">
+                <Button className="bg-primary-600 hover:bg-primary-700">
                   <Plus className="h-4 w-4 mr-2" />
                   New Event
                 </Button>
