@@ -152,7 +152,7 @@ const PaymentsInterface = () => {
     switch (activeTab) {
       case 'send':
         return (
-          <div className="max-w-md mx-auto">
+          <div className="w-full max-w-md mx-auto px-4">
             <PaymentForm
               onSend={handleSendPaymentForm}
               onScanQR={handleScanQR}
@@ -161,15 +161,18 @@ const PaymentsInterface = () => {
         );
       case 'history':
         return (
-          <TransactionList
-            transactions={transactions}
-            onFilter={handleFilterTransactions}
-          />
+          <div className="px-4">
+            <TransactionList
+              transactions={transactions}
+              onFilter={handleFilterTransactions}
+            />
+          </div>
         );
       default:
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
+          <div className="space-y-6 px-4">
+            {/* Mobile: Stack everything vertically */}
+            <div className="block lg:hidden space-y-6">
               <WalletBalance balances={walletBalances} />
               <QuickActions
                 onSend={handleSendPayment}
@@ -177,24 +180,39 @@ const PaymentsInterface = () => {
                 onScan={handleScanQR}
                 onHistory={handleViewHistory}
               />
-            </div>
-            <div className="space-y-6">
               <PaymentMethods
                 methods={paymentMethods}
                 onToggleMethod={handleToggleMethod}
               />
-              <div className="lg:hidden">
+              <TransactionList
+                transactions={transactions.slice(0, 3)}
+                onFilter={handleFilterTransactions}
+              />
+            </div>
+            
+            {/* Desktop: Side by side layout */}
+            <div className="hidden lg:grid lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <WalletBalance balances={walletBalances} />
+                <QuickActions
+                  onSend={handleSendPayment}
+                  onReceive={handleReceivePayment}
+                  onScan={handleScanQR}
+                  onHistory={handleViewHistory}
+                />
+              </div>
+              <div className="space-y-6">
+                <PaymentMethods
+                  methods={paymentMethods}
+                  onToggleMethod={handleToggleMethod}
+                />
+              </div>
+              <div className="col-span-2">
                 <TransactionList
-                  transactions={transactions.slice(0, 3)}
+                  transactions={transactions}
                   onFilter={handleFilterTransactions}
                 />
               </div>
-            </div>
-            <div className="hidden lg:block lg:col-span-2">
-              <TransactionList
-                transactions={transactions}
-                onFilter={handleFilterTransactions}
-              />
             </div>
           </div>
         );
@@ -202,17 +220,17 @@ const PaymentsInterface = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="h-full overflow-auto">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
+      <div className="sticky top-0 bg-white border-b border-gray-200 p-4 md:p-6 z-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
-            <p className="text-gray-600">Manage your digital wallets and transactions</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Payments</h1>
+            <p className="text-sm md:text-base text-gray-600">Manage your digital wallets and transactions</p>
           </div>
           
-          {/* Tab Navigation */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          {/* Tab Navigation - Mobile optimized */}
+          <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
             {[
               { id: 'overview', label: 'Overview' },
               { id: 'send', label: 'Send' },
@@ -221,7 +239,7 @@ const PaymentsInterface = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -235,7 +253,9 @@ const PaymentsInterface = () => {
       </div>
 
       {/* Content */}
-      {renderContent()}
+      <div className="flex-1 pb-6">
+        {renderContent()}
+      </div>
     </div>
   );
 };
