@@ -1,4 +1,3 @@
-
 import { MatrixClient, createClient } from "matrix-js-sdk";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,11 +8,28 @@ interface MatrixCredentials {
   home_server: string;
 }
 
+interface MatrixCredentialsSecure {
+  matrix_user_id: string;
+  access_token?: string; // Only if legacy/plain still needed
+  encrypted_access_token?: Uint8Array | string; // New encrypted token
+  access_token_salt?: string | null;
+  device_id: string;
+  home_server: string;
+}
+
 let matrixClient: MatrixClient | null = null;
 
+// Helper to issue a warning if legacy plaintext access_token is being used
+function warnIfPlainTokenInUse(credentials: any) {
+  if (credentials.access_token && !credentials.encrypted_access_token) {
+    console.warn('[SECURITY] Using PLAINTEXT Matrix access_token. Upgrade to encrypted_access_token ASAP!');
+  }
+}
+
+// UPDATE this function once you are ready to use encrypted tokens only
 export const initializeMatrixClient = async (userId: string): Promise<MatrixClient | null> => {
   try {
-    // Fetch Matrix credentials from Supabase
+    // Fetch secure matrix credentials from Supabase
     const { data: credentials, error } = await supabase
       .from('matrix_credentials')
       .select('*')
@@ -25,10 +41,15 @@ export const initializeMatrixClient = async (userId: string): Promise<MatrixClie
       return null;
     }
 
-    // Create Matrix client instance
+    warnIfPlainTokenInUse(credentials);
+
+    // TODO: Future: decrypt and use credentials.encrypted_access_token after migration is complete.
+    // For now, fallback to legacy access_token for compatibility.
+    // If encrypted_access_token is present, prefer it (implementation of decryption needed).
+
     matrixClient = createClient({
       baseUrl: credentials.home_server,
-      accessToken: credentials.access_token,
+      accessToken: credentials.access_token, // TODO: Switch to decrypted token
       userId: credentials.matrix_user_id,
       deviceId: credentials.device_id,
     });
@@ -77,3 +98,6 @@ export const loginMatrixUser = async (username: string, password: string) => {
     throw error;
   }
 };
+
+// NOTE: All functions will need to be updated to use end-to-end encrypted access tokens only once your migration & encryption layer is ready.
+// See the Supabase migration notes and Team TODOs above.

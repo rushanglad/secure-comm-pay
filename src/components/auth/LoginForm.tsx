@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -44,15 +43,17 @@ const LoginForm = () => {
             .maybeSingle();
             
           if (!existingCreds) {
-            // Store Matrix credentials if they don't exist
+            // TODO [SECURITY]: Store ENCRYPTED token after migration complete!
             await supabase
               .from('matrix_credentials')
               .insert({
                 user_id: authData.user.id,
                 matrix_user_id: matrixLogin.user_id,
-                access_token: matrixLogin.access_token,
+                access_token: matrixLogin.access_token, // Temporary plaintext. ENCRYPT this before storing after migration!
                 device_id: matrixLogin.device_id,
                 home_server: 'https://matrix.org',
+                // encrypted_access_token: XXX TODO in the future
+                // access_token_salt: XXX TODO in the future
               });
           }
         }

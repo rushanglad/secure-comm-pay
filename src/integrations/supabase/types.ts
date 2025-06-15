@@ -54,8 +54,10 @@ export type Database = {
       matrix_credentials: {
         Row: {
           access_token: string
+          access_token_salt: string | null
           created_at: string
           device_id: string
+          encrypted_access_token: string | null
           home_server: string
           id: string
           matrix_user_id: string
@@ -64,8 +66,10 @@ export type Database = {
         }
         Insert: {
           access_token: string
+          access_token_salt?: string | null
           created_at?: string
           device_id: string
+          encrypted_access_token?: string | null
           home_server: string
           id?: string
           matrix_user_id: string
@@ -74,8 +78,10 @@ export type Database = {
         }
         Update: {
           access_token?: string
+          access_token_salt?: string | null
           created_at?: string
           device_id?: string
+          encrypted_access_token?: string | null
           home_server?: string
           id?: string
           matrix_user_id?: string
@@ -182,6 +188,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      basic_sanitize: {
+        Args: { input: string }
+        Returns: string
+      }
       log_security_event: {
         Args: {
           p_action: string

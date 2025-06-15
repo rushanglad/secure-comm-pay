@@ -38,17 +38,20 @@ const SignUpForm = () => {
       // 2. Create Matrix account for the user
       try {
         const matrixRegistration = await registerMatrixUser(username, password);
-        
+
         // 3. Store Matrix credentials in Supabase
         if (authData.user && matrixRegistration) {
+          // TODO [SECURITY]: Store only ENCRYPTED access token in the future.
           await supabase
             .from('matrix_credentials')
             .insert({
               user_id: authData.user.id,
               matrix_user_id: matrixRegistration.user_id,
-              access_token: matrixRegistration.access_token,
+              access_token: matrixRegistration.access_token, // For now, fill legacy. ENCRYPT THIS BEFORE STORAGE in the future!
               device_id: matrixRegistration.device_id,
               home_server: 'https://matrix.org',
+              // encrypted_access_token: XXX TODO in future
+              // access_token_salt: XXX TODO in future
             });
         }
       } catch (matrixError) {
@@ -85,3 +88,4 @@ const SignUpForm = () => {
 };
 
 export default SignUpForm;
+
