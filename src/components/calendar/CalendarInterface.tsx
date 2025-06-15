@@ -91,7 +91,7 @@ const CalendarInterface = () => {
       <div className="bg-white border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">ProtonCalendar</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-purple-600 hover:bg-purple-700">

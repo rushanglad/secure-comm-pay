@@ -118,7 +118,7 @@ const PaymentsInterface = () => {
       <div className="bg-white border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">ProtonWallet</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Wallet</h1>
             <Button className="bg-indigo-600 hover:bg-indigo-700">
               <Plus className="h-4 w-4 mr-2" />
               Add Funds
