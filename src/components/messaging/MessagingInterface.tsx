@@ -1,177 +1,208 @@
 
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import ChatListSidebar from './ChatListSidebar';
-import ChatHeader from './ChatHeader';
-import MessageList from './MessageList';
-import AttachmentPreview from './AttachmentPreview';
-import MessageInput from './MessageInput';
-import EmptyState from './EmptyState';
-
-interface Message {
-  id: string;
-  sender: string;
-  content: string;
-  timestamp: string;
-  isOwn: boolean;
-  attachments?: Array<{
-    id: string;
-    name: string;
-    type: 'image' | 'file';
-    size: string;
-    url?: string;
-  }>;
-}
-
-interface Chat {
-  id: string;
-  name: string;
-  lastMessage: string;
-  timestamp: string;
-  unread: number;
-  isGroup?: boolean;
-}
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { 
+  MessageSquare, 
+  Send, 
+  Shield, 
+  Users,
+  Plus,
+  Search
+} from 'lucide-react';
 
 const MessagingInterface = () => {
-  const [selectedChat, setSelectedChat] = useState<string | null>('1');
-  const [newMessage, setNewMessage] = useState('');
-  const [attachments, setAttachments] = useState<File[]>([]);
-  const [messages, setMessages] = useState<Message[]>([
+  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [message, setMessage] = useState('');
+
+  const mockChats = [
     {
       id: '1',
-      sender: 'John Doe',
-      content: 'Hey, how are you? I wanted to discuss the project details.',
+      name: 'Work Team',
+      lastMessage: 'Meeting scheduled for tomorrow',
+      unread: 2,
+      isGroup: true,
+      encrypted: true
+    },
+    {
+      id: '2',
+      name: 'Alice Smith',
+      lastMessage: 'Thanks for the update!',
+      unread: 0,
+      isGroup: false,
+      encrypted: true
+    },
+    {
+      id: '3',
+      name: 'Family Group',
+      lastMessage: 'Dinner plans for Sunday?',
+      unread: 5,
+      isGroup: true,
+      encrypted: true
+    }
+  ];
+
+  const mockMessages = [
+    {
+      id: '1',
+      sender: 'Alice Smith',
+      content: 'Hey, how are you doing?',
       timestamp: '10:30 AM',
       isOwn: false
     },
     {
       id: '2',
       sender: 'You',
-      content: "I'm doing great! How about you? Let's set up a call to discuss.",
+      content: 'I\'m doing great! How about you?',
       timestamp: '10:32 AM',
       isOwn: true
     },
     {
       id: '3',
-      sender: 'John Doe',
-      content: 'Perfect! I have some documents to share with you.',
+      sender: 'Alice Smith',
+      content: 'Thanks for the update!',
       timestamp: '10:35 AM',
-      isOwn: false,
-      attachments: [
-        {
-          id: '1',
-          name: 'project-specs.pdf',
-          type: 'file',
-          size: '2.4 MB'
-        }
-      ]
-    }
-  ]);
-  
-  const { toast } = useToast();
-
-  const chats: Chat[] = [
-    {
-      id: '1',
-      name: 'John Doe',
-      lastMessage: 'Perfect! I have some documents...',
-      timestamp: '2 min ago',
-      unread: 0
-    },
-    {
-      id: '2',
-      name: 'Project Team',
-      lastMessage: 'Meeting at 3 PM today',
-      timestamp: '1 hour ago',
-      unread: 2,
-      isGroup: true
-    },
-    {
-      id: '3',
-      name: 'Sarah Wilson',
-      lastMessage: 'Thanks for the update!',
-      timestamp: '3 hours ago',
-      unread: 0
+      isOwn: false
     }
   ];
 
-  const currentChat = chats.find(c => c.id === selectedChat);
-
   const handleSendMessage = () => {
-    if (newMessage.trim() || attachments.length > 0) {
-      const messageAttachments = attachments.map((file, index) => ({
-        id: `${Date.now()}-${index}`,
-        name: file.name,
-        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
-        size: formatFileSize(file.size)
-      }));
-
-      const message: Message = {
-        id: `${Date.now()}`,
-        sender: 'You',
-        content: newMessage.trim(),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isOwn: true,
-        attachments: messageAttachments.length > 0 ? messageAttachments : undefined
-      };
-
-      setMessages(prev => [...prev, message]);
-      setNewMessage('');
-      setAttachments([]);
-      
-      toast({
-        title: "Message sent",
-        description: "Your message has been delivered with end-to-end encryption.",
-      });
+    if (message.trim()) {
+      console.log('Sending message:', message);
+      setMessage('');
     }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setAttachments(prev => [...prev, ...files]);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   return (
-    <div className="flex h-[calc(100vh-8rem)] bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <ChatListSidebar 
-        chats={chats}
-        selectedChat={selectedChat}
-        onSelectChat={setSelectedChat}
-      />
+    <div className="h-[calc(100vh-8rem)] flex gap-4">
+      {/* Chat List Sidebar */}
+      <Card className="w-80 flex flex-col">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Messages
+            </CardTitle>
+            <Button size="sm" variant="outline">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search conversations..."
+              className="pl-10"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="flex-1 p-0">
+          <div className="space-y-1">
+            {mockChats.map((chat) => (
+              <div
+                key={chat.id}
+                onClick={() => setSelectedChat(chat.id)}
+                className={`p-3 border-b cursor-pointer hover:bg-gray-50 transition-colors ${
+                  selectedChat === chat.id ? 'bg-blue-50 border-r-2 border-r-blue-500' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">{chat.name}</span>
+                    {chat.isGroup && (
+                      <Users className="h-3 w-3 text-muted-foreground" />
+                    )}
+                    {chat.encrypted && (
+                      <Shield className="h-3 w-3 text-green-500" />
+                    )}
+                  </div>
+                  {chat.unread > 0 && (
+                    <Badge className="bg-blue-500 text-white text-xs px-2 py-0">
+                      {chat.unread}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground truncate">
+                  {chat.lastMessage}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex-1 flex flex-col">
-        {selectedChat && currentChat ? (
+      {/* Chat Interface */}
+      <Card className="flex-1 flex flex-col">
+        {selectedChat ? (
           <>
-            <ChatHeader chatName={currentChat.name} />
-            <MessageList messages={messages} />
-            <AttachmentPreview 
-              attachments={attachments}
-              onRemoveAttachment={removeAttachment}
-            />
-            <MessageInput
-              newMessage={newMessage}
-              setNewMessage={setNewMessage}
-              attachments={attachments}
-              onSendMessage={handleSendMessage}
-              onFileSelect={handleFileSelect}
-            />
+            <CardHeader className="pb-3 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-lg">
+                    {mockChats.find(c => c.id === selectedChat)?.name}
+                  </CardTitle>
+                  <Shield className="h-4 w-4 text-green-500" />
+                  <Badge variant="secondary" className="text-xs">
+                    End-to-End Encrypted
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="flex-1 p-4 overflow-y-auto">
+              <div className="space-y-4">
+                {mockMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        msg.isOwn
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-900'
+                      }`}
+                    >
+                      {!msg.isOwn && (
+                        <p className="text-xs font-medium mb-1">{msg.sender}</p>
+                      )}
+                      <p className="text-sm">{msg.content}</p>
+                      <p className={`text-xs mt-1 ${
+                        msg.isOwn ? 'text-blue-100' : 'text-gray-500'
+                      }`}>
+                        {msg.timestamp}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+            
+            <div className="p-4 border-t">
+              <div className="flex gap-2">
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Type your message..."
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  className="flex-1"
+                />
+                <Button onClick={handleSendMessage} disabled={!message.trim()}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </>
         ) : (
-          <EmptyState />
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Select a conversation to start messaging</p>
+            </div>
+          </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };
