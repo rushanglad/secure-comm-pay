@@ -1,17 +1,23 @@
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Send, Plus, Inbox, FileText, Trash2, Search, Star, Archive, Reply, Forward, MoreHorizontal } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Email {
   id: string;
-  from: string;
-  subject: string;
+  from: string; // For sent/drafts, this can represent 'to'
+  subject:string;
   preview: string;
   timestamp: string;
   read: boolean;
@@ -25,37 +31,65 @@ const EmailInterface = () => {
   const [newEmail, setNewEmail] = useState({ to: '', subject: '', body: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
+  const allEmails: { [key: string]: Email[] } = {
+    inbox: [
+      {
+        id: '1',
+        from: 'alice@example.com',
+        subject: 'Project Update - Q1 2024',
+        preview: 'Here\'s the latest update on our project progress. We\'ve made significant improvements...',
+        timestamp: '2 hours ago',
+        read: false,
+        starred: true
+      },
+      {
+        id: '2',
+        from: 'security@example.com',
+        subject: 'Security Alert: New Login Detected',
+        preview: 'We noticed a new login to your account from a device we don\'t recognize...',
+        timestamp: '1 day ago',
+        read: true,
+        starred: false
+      }
+    ],
+    sent: [
+      {
+        id: '3',
+        from: 'bob@example.com',
+        subject: 'Re: Dinner tonight?',
+        preview: 'Sounds great! See you at 8 PM.',
+        timestamp: '5 hours ago',
+        read: true,
+        starred: false
+      }
+    ],
+    drafts: [
+      {
+        id: '4',
+        from: 'charlie@example.com',
+        subject: 'Draft: Marketing Strategy',
+        preview: 'Here are some initial thoughts on the new marketing campaign...',
+        timestamp: '2 days ago',
+        read: true,
+        starred: false
+      }
+    ],
+    trash: [],
+  };
+
   const folders = [
-    { id: 'inbox', name: 'Inbox', icon: Inbox, count: 3, color: 'text-blue-600' },
-    { id: 'sent', name: 'Sent', icon: Send, count: 0, color: 'text-green-600' },
-    { id: 'drafts', name: 'Drafts', icon: FileText, count: 1, color: 'text-orange-600' },
-    { id: 'trash', name: 'Trash', icon: Trash2, count: 0, color: 'text-red-600' }
+    { id: 'inbox', name: 'Inbox', icon: Inbox, count: allEmails.inbox.length, color: 'text-blue-600' },
+    { id: 'sent', name: 'Sent', icon: Send, count: allEmails.sent.length, color: 'text-green-600' },
+    { id: 'drafts', name: 'Drafts', icon: FileText, count: allEmails.drafts.length, color: 'text-orange-600' },
+    { id: 'trash', name: 'Trash', icon: Trash2, count: allEmails.trash.length, color: 'text-red-600' }
   ];
 
-  const emails: Email[] = [
-    {
-      id: '1',
-      from: 'alice@protonmail.com',
-      subject: 'Project Update - Q1 2024',
-      preview: 'Here\'s the latest update on our project progress. We\'ve made significant improvements...',
-      timestamp: '2 hours ago',
-      read: false,
-      starred: true
-    },
-    {
-      id: '2',
-      from: 'security@protonmail.com',
-      subject: 'Security Alert: New Login Detected',
-      preview: 'We noticed a new login to your account from a device we don\'t recognize...',
-      timestamp: '1 day ago',
-      read: true,
-      starred: false
-    }
-  ];
+  const emails: Email[] = allEmails[selectedFolder] || [];
 
   const handleSendEmail = () => {
     if (newEmail.to && newEmail.subject) {
       console.log('Sending email:', newEmail);
+      // In a real app, you'd handle the API call here
       setNewEmail({ to: '', subject: '', body: '' });
       setComposing(false);
     }
@@ -69,7 +103,7 @@ const EmailInterface = () => {
       <div className="bg-white border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">ProtonMail</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Mail</h1>
             <Button onClick={() => setComposing(true)} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="h-4 w-4 mr-2" />
               Compose
@@ -101,7 +135,10 @@ const EmailInterface = () => {
                     ? 'bg-blue-50 text-blue-700 border border-blue-200' 
                     : 'hover:bg-gray-50'
                 }`}
-                onClick={() => setSelectedFolder(folder.id)}
+                onClick={() => {
+                  setSelectedFolder(folder.id);
+                  setSelectedEmail(null);
+                }}
               >
                 <div className="flex items-center gap-3">
                   <folder.icon className={`h-5 w-5 ${folder.color}`} />
@@ -137,7 +174,7 @@ const EmailInterface = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
                       <span className={`text-sm ${!email.read ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
-                        {email.from}
+                        {selectedFolder === 'inbox' ? email.from : `To: ${email.from}`}
                       </span>
                       {email.starred && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
                     </div>
@@ -153,44 +190,9 @@ const EmailInterface = () => {
           </ScrollArea>
         </div>
 
-        {/* Email Content or Compose */}
+        {/* Email Content */}
         <div className="flex-1 bg-white">
-          {composing ? (
-            <div className="h-full flex flex-col">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">New Message</h2>
-              </div>
-              <div className="flex-1 p-6 space-y-4">
-                <Input
-                  placeholder="To"
-                  value={newEmail.to}
-                  onChange={(e) => setNewEmail(prev => ({ ...prev, to: e.target.value }))}
-                  className="border-gray-300"
-                />
-                <Input
-                  placeholder="Subject"
-                  value={newEmail.subject}
-                  onChange={(e) => setNewEmail(prev => ({ ...prev, subject: e.target.value }))}
-                  className="border-gray-300"
-                />
-                <Textarea
-                  placeholder="Write your message..."
-                  className="min-h-[400px] border-gray-300 resize-none"
-                  value={newEmail.body}
-                  onChange={(e) => setNewEmail(prev => ({ ...prev, body: e.target.value }))}
-                />
-              </div>
-              <div className="p-6 border-t border-gray-200 flex gap-3">
-                <Button onClick={handleSendEmail} className="bg-blue-600 hover:bg-blue-700">
-                  <Send className="h-4 w-4 mr-2" />
-                  Send
-                </Button>
-                <Button variant="outline" onClick={() => setComposing(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : selectedEmailData ? (
+          {selectedEmailData ? (
             <div className="h-full flex flex-col">
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-start justify-between mb-4">
@@ -225,7 +227,7 @@ const EmailInterface = () => {
                     This is the full email content. In a real implementation, this would show the complete encrypted email content with proper formatting and security features.
                   </p>
                   <p className="text-gray-700 leading-relaxed mt-4">
-                    ProtonMail's end-to-end encryption ensures that only you and the intended recipient can read the message. Your privacy is protected at all times.
+                    Our end-to-end encryption ensures that only you and the intended recipient can read the message. Your privacy is protected at all times.
                   </p>
                 </div>
               </ScrollArea>
@@ -234,12 +236,46 @@ const EmailInterface = () => {
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <Mail className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">Select an email to read</p>
+                <p className="text-gray-500 text-lg">
+                  {emails.length > 0 ? 'Select an email to read' : 'This folder is empty'}
+                </p>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      <Dialog open={composing} onOpenChange={setComposing}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>New Message</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2 pb-4">
+            <Input
+              placeholder="To"
+              value={newEmail.to}
+              onChange={(e) => setNewEmail(prev => ({ ...prev, to: e.target.value }))}
+            />
+            <Input
+              placeholder="Subject"
+              value={newEmail.subject}
+              onChange={(e) => setNewEmail(prev => ({ ...prev, subject: e.target.value }))}
+            />
+            <Textarea
+              placeholder="Write your message..."
+              className="min-h-[300px] resize-none"
+              value={newEmail.body}
+              onChange={(e) => setNewEmail(prev => ({ ...prev, body: e.target.value }))}
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSendEmail} className="bg-blue-600 hover:bg-blue-700">
+              <Send className="h-4 w-4 mr-2" />
+              Send
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
