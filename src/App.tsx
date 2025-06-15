@@ -7,7 +7,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard"; // Add this import
+import Dashboard from "./pages/Dashboard";
+import Messages from "./pages/Messages";
+import Email from "./pages/Email";
+import Calendar from "./pages/Calendar";
+import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -24,6 +28,10 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/email" element={<Email />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/payments" element={<Payments />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
